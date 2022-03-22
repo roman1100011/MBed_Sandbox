@@ -12,10 +12,18 @@ DigitalOut armMotor(PC_12);
     // Enable the ADC, 12MHz,  the final term should be (2**BURST_CHANNELS - 1)
 int ToNextFunction;
 
-int StartPosition(void);
-int DriveForward(void);
-int LiftUp(void);
-int DriveBack(void);
+int StartPosition(void){
+    return 0;
+}
+int DriveForward(void){
+    return 0;
+}
+int LiftUp(void){
+    return 0;
+}
+int DriveBack(void){
+    return 0;
+}
 
 
 
