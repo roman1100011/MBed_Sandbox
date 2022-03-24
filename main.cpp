@@ -9,8 +9,9 @@ It is built as Step after Step programm, if any step fails the Program feils it 
 #include "PinNames.h"
 #include "mbed.h"
 #include "pinmap.h"
+#include <cstdint>
 #include <cwchar>
-
+#include "PM2_Libary.h"
 
 
 //arbitrary allocation of pins -> for testing this has to be adjusted
@@ -28,6 +29,26 @@ float trigerValueRearSensor = 0.0f;
 float trigerValueFrontSensor = 0.0f;
 
 
+//actors Definition
+
+//Encoder pin 
+EncoderCounter  encoder_M3(PA_0, PA_1);
+
+//motor pin
+FastPWM pwm_M_right(PA_10);              
+FastPWM pwm_M_left(PA_9); 
+
+// create SpeedController and PositionController objects, default parametrization is for 78.125:1 gear box
+float max_voltage = 12.0f;                  // define maximum voltage of battery packs, adjust this to 6.0f V if you only use one batterypack
+float counts_per_turn = 20.0f * 78.125f;    // define counts per turn at gearbox end: counts/turn * gearratio
+float kn = 180.0f / 12.0f;                  // define motor constant in rpm per V
+float k_gear = 100.0f / 78.125f;            // define additional ratio in case you are using a dc motor with a different gear box, e.g. 100:1
+float kp = 0.1f;                            // define custom kp, this is the default speed controller gain for gear box 78.125:1
+
+PositionController positionController_M_right(counts_per_turn * k_gear, kn / k_gear, kp * k_gear, max_voltage, pwm_M_right, encoder_M3); // parameters adjusted to 100:1 gear, we need a different speed controller gain here
+PositionController positionController_M_left(counts_per_turn * k_gear, kn / k_gear, kp * k_gear, max_voltage, pwm_M_left, encoder_M3); // parameters adjusted to 100:1 gear, we need a different speed controller gain here
+
+
 //only moves the arm in to the starting position
 int StartPosition(void){
     if(true){
@@ -37,11 +58,20 @@ int StartPosition(void){
 }
 
 //Drives forward into the next step
-int DriveForward(void){
-    if (true) {    
-        return 1;
-    }
+int DriveForward(int8_t dist){
+    int8_t i = 0;         //prov condition variable
+
+
+    int8_t distance = dist; //distance which will be driven in [mm]
+    float factor = 1.0f; //factor for calculating the value in to the float which will be given to the setDesiredRotation function
+    float distanceValue = float(distance)*factor;
+    do{
+        positionController_M_right.setDesiredRotation(distanceValue);
+        positionController_M_left.setDesiredRotation(distanceValue);
+        i++;
+    }while(i < 1);
     return 0;
+    
 }
 
 //only turns the arm until the robot is on the next step
@@ -51,15 +81,6 @@ int LiftUp(void){
     }
     return 0;
 }
-
-//Drives Back until the robot dosn't see a step with the rear senor
-int DriveBack(void){
-    if(true){
-        return 1;
-    }
-    return 0;
-}
-
 
 
 
@@ -79,7 +100,7 @@ int main()
             }
         }
         
-
+thread_sleep_for(10);
     }
 }
 
