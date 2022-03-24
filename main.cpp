@@ -11,7 +11,7 @@ It is built as Step after Step programm, if any step fails the Program feils it 
 #include <cwchar>
 #include "PM2_Libary.h"
 
-
+//------------------------------------general IO and Variables----------------------------------------------------------
 //arbitrary allocation of pins -> for testing this has to be adjusted
 AnalogIn ch0(PA_15); //IR TOF sensor at the front
 AnalogIn RearSensor(PC_9); //IR TOF sensor at the back facing down
@@ -80,7 +80,7 @@ int LiftUp(int8_t deg){
     int8_t rotation = deg;
     int8_t i = 0;         //prov condition variable
     do{
-        positionController_M_right.setDesiredRotation(deg);
+        positionController_M_Arm.setDesiredRotation(deg);
         
         i++;
     }while(i < 1);
